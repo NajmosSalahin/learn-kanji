@@ -9,6 +9,7 @@ interface KanjiListResponse {
     total: number;
     totalPages: number;
   };
+  summary?: Record<string, number>;
 }
 
 interface KanjiFilters {
@@ -18,6 +19,8 @@ interface KanjiFilters {
   jlpt?: string;
   grade?: string;
   strokes?: string;
+  library?: string;
+  stage?: string;
 }
 
 export function useKanjiList(filters: KanjiFilters = {}) {
@@ -28,6 +31,8 @@ export function useKanjiList(filters: KanjiFilters = {}) {
   if (filters.jlpt) params.set("jlpt", filters.jlpt);
   if (filters.grade) params.set("grade", filters.grade);
   if (filters.strokes) params.set("strokes", filters.strokes);
+  if (filters.library) params.set("library", filters.library);
+  if (filters.stage) params.set("stage", filters.stage);
   params.set("includeProgress", "true");
 
   return useQuery<KanjiListResponse>({
@@ -65,6 +70,28 @@ export function useAddToDeck() {
       if (!res.ok) {
         const err = await res.json();
         throw new Error(err.error || "Failed to add kanji");
+      }
+      return res.json();
+    },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["kanji"] });
+      },
+    });
+  }
+
+export function useRemoveFromDeck() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (character: string) => {
+      const res = await fetch("/api/study/remove", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ character }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to remove kanji");
       }
       return res.json();
     },

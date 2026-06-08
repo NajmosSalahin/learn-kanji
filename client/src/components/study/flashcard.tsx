@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { KanjiProgress } from "@/types/study";
+import { SpeakButton } from "@/components/ui/speak-button";
+import { useTts } from "@/hooks/use-tts";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface FlashcardProps {
@@ -9,15 +11,26 @@ interface FlashcardProps {
 
 export function Flashcard({ card, onFlip }: FlashcardProps) {
   const [flipped, setFlipped] = useState(false);
+  const { speak, isReady } = useTts();
+  const autoPlayedRef = useRef(false);
+
+  const primaryReading = card.character;
 
   function handleFlip() {
     setFlipped(true);
     onFlip?.();
   }
 
-  const readingsOn = card.kanjiData?.readings_on?.join(", ") || "—";
-  const readingsKun = card.kanjiData?.readings_kun?.join(", ") || "—";
-  const nameReadings = card.kanjiData?.name_readings?.join(", ") || "—";
+  useEffect(() => {
+    if (flipped && primaryReading && isReady && !autoPlayedRef.current) {
+      autoPlayedRef.current = true;
+      speak(primaryReading);
+    }
+  }, [flipped, primaryReading, isReady, speak]);
+
+  const readingsOn = card.kanjiData?.readings_on || [];
+  const readingsKun = card.kanjiData?.readings_kun || [];
+  const nameReadings = card.kanjiData?.name_readings || [];
   const meanings = card.kanjiData?.meanings?.join(", ") || "—";
 
   return (
@@ -43,15 +56,36 @@ export function Flashcard({ card, onFlip }: FlashcardProps) {
           <div className="card-back flex flex-col items-center justify-center rounded-xl border border-border bg-surface p-8">
             <span className="font-kanji text-5xl text-accent">{card.character}</span>
             <div className="mt-4 space-y-2 text-center">
-              <p className="text-sm text-text-secondary">
-                ON: <span className="text-text-primary">{readingsOn}</span>
-              </p>
-              <p className="text-sm text-text-secondary">
-                KUN: <span className="text-text-primary">{readingsKun}</span>
-              </p>
-              <p className="text-sm text-text-secondary">
-                NAME: <span className="text-text-primary">{nameReadings}</span>
-              </p>
+              {readingsOn.length > 0 && (
+                <p className="text-sm text-text-secondary inline-flex items-center gap-1">
+                  ON: {readingsOn.map((r, i) => (
+                    <span key={r} className="inline-flex items-center gap-0.5">
+                      {i > 0 && "、"}{r}
+                      <SpeakButton text={r} size="sm" />
+                    </span>
+                  ))}
+                </p>
+              )}
+              {readingsKun.length > 0 && (
+                <p className="text-sm text-text-secondary inline-flex items-center gap-1">
+                  KUN: {readingsKun.map((r, i) => (
+                    <span key={r} className="inline-flex items-center gap-0.5">
+                      {i > 0 && "、"}{r}
+                      <SpeakButton text={r} size="sm" />
+                    </span>
+                  ))}
+                </p>
+              )}
+              {nameReadings.length > 0 && (
+                <p className="text-sm text-text-secondary inline-flex items-center gap-1">
+                  NAME: {nameReadings.map((r, i) => (
+                    <span key={r} className="inline-flex items-center gap-0.5">
+                      {i > 0 && "、"}{r}
+                      <SpeakButton text={r} size="sm" />
+                    </span>
+                  ))}
+                </p>
+              )}
               <p className="text-sm text-text-secondary">
                 <span className="text-text-primary">{meanings}</span>
               </p>

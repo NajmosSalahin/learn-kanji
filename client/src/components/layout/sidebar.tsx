@@ -7,6 +7,7 @@ import {
   Settings,
   LogOut,
   ChevronLeft,
+  Library,
 } from "lucide-react";
 import { useState } from "react";
 import { useAuthStore } from "@/stores/auth.store";
@@ -20,7 +21,7 @@ const NAV_ITEMS = [
 ];
 
 export function Sidebar() {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   const logout = useAuthStore((s) => s.logout);
   const [collapsed, setCollapsed] = useState(false);
 
@@ -59,6 +60,17 @@ export function Sidebar() {
             </Link>
           );
         })}
+        <Link
+          to="/library"
+          className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
+            pathname === "/library"
+              ? "bg-accent/10 text-accent"
+              : "text-text-secondary hover:bg-surface/80 hover:text-text-primary"
+          }`}
+        >
+          <Library className="h-4 w-4 flex-shrink-0" />
+          {!collapsed && <span>Library</span>}
+        </Link>
       </nav>
 
       <div className="border-t border-border p-2">

@@ -2,6 +2,7 @@ import { create } from "zustand";
 import type { KanjiProgress, StudyDeck, ReviewedCard, ReviewResponse } from "@/types/study";
 import type { Quality } from "@/types/kanji";
 import type { SessionStatus } from "@/types/study";
+import { toast } from "sonner";
 
 interface SessionStore {
   status: SessionStatus;
@@ -66,12 +67,28 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
 
       if (res.ok) {
         const data: ReviewResponse = await res.json();
+        const prevStage = state.currentCard.stage;
+        const newStage = data.progress.stage;
+        if (prevStage !== newStage && newStage !== "new") {
+          const labels: Record<string, string> = {
+            learning: "Learning",
+            review: "Reviewed",
+            mastered: "Mastered",
+          };
+          const label = labels[newStage] || newStage;
+          if (newStage === "mastered") {
+            toast.success(`Promoted to ${label}! 🎉`);
+          } else {
+            toast.success(`Moved to ${label}`);
+          }
+        }
+
         const reviewed: ReviewedCard = {
           character,
           quality,
           correct,
           xpEarned: data.xpAwarded,
-          stage: data.progress.stage,
+          stage: newStage,
         };
 
         const newQueue = state.queue.filter((c) => c.character !== character);

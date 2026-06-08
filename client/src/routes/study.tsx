@@ -6,7 +6,7 @@ import { useStudySession } from "@/hooks/use-study-session";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { GraduationCap, Clock, Target, Layers } from "lucide-react";
+import { GraduationCap, Clock, Target, Layers, Info } from "lucide-react";
 import type { StudyDeck } from "@/types/study";
 
 export const Route = createFileRoute("/study")({
@@ -132,6 +132,27 @@ function StudyPage() {
                 </p>
               </Card>
             )}
+
+            <Card className="p-4">
+              <div className="flex items-start gap-3">
+                <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-text-secondary" />
+                <div className="text-xs text-text-secondary leading-relaxed">
+                  <p className="mb-1 font-medium text-text-primary">How SRS works</p>
+                  <p className="mb-1">
+                    Cards progress: <span className="text-yellow-400">New</span> →{" "}
+                    <span className="text-blue-400">Learning</span> →{" "}
+                    <span className="text-green-400">Reviewed</span> →{" "}
+                    <span className="text-purple-400">Mastered</span>
+                  </p>
+                  <p>
+                    <span className="text-red-400">Again</span> = forgot
+                    · <span className="text-orange-400">Hard</span> = struggled
+                    · <span className="text-green-400">Good</span> = correct
+                    · <span className="text-accent">Easy</span> = perfect
+                  </p>
+                </div>
+              </div>
+            </Card>
           </div>
         </main>
       </div>

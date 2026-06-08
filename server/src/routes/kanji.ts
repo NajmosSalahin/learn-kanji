@@ -17,8 +17,38 @@ router.get("/", async (req: Request, res: Response) => {
     const jlpt = req.query.jlpt as string;
     const grade = req.query.grade as string;
     const strokes = req.query.strokes as string;
+    const library = req.query.library as string;
+    const libraryStage = req.query.stage as string;
     const includeProgress = req.query.includeProgress === "true";
     const userId = (req as any).userId;
+
+    let libraryCharacters: string[] | null = null;
+    let librarySummary: Record<string, number> | null = null;
+    if (library === "true" && userId) {
+      const progressFilter: Record<string, unknown> = { userId };
+      if (libraryStage) progressFilter.stage = libraryStage;
+      const docs = await KanjiProgress.find(progressFilter)
+        .select("character")
+        .lean();
+      libraryCharacters = docs.map((d) => d.character);
+      if (libraryCharacters.length === 0) {
+        res.json({
+          data: [],
+          pagination: { page, limit, total: 0, totalPages: 0 },
+          summary: { total: 0, new: 0, learning: 0, review: 0, mastered: 0 },
+        });
+        return;
+      }
+      const counts = await KanjiProgress.aggregate([
+        { $match: { userId } },
+        { $group: { _id: "$stage", count: { $sum: 1 } } },
+      ]);
+      librarySummary = { total: 0, new: 0, learning: 0, review: 0, mastered: 0 };
+      for (const c of counts) {
+        librarySummary[c._id as string] = c.count;
+        librarySummary.total += c.count;
+      }
+    }
 
     let kanjiList: Record<string, any>[];
     let total: number;
@@ -26,11 +56,18 @@ router.get("/", async (req: Request, res: Response) => {
     if (search) {
       await initKanjiSearch();
       let results = searchKanji(search, { jlpt, grade, strokes });
+      if (libraryCharacters) {
+        const set = new Set(libraryCharacters);
+        results = results.filter((r) => set.has(r.item.character));
+      }
       total = results.length;
       const skip = (page - 1) * limit;
       kanjiList = results.slice(skip, skip + limit).map((r) => r.item);
     } else {
       const filter: Record<string, unknown> = {};
+      if (libraryCharacters) {
+        filter.character = { $in: libraryCharacters };
+      }
 
       if (jlpt) {
         if (jlpt === "other") {
@@ -86,12 +123,18 @@ router.get("/", async (req: Request, res: Response) => {
         character: { $in: characters },
       }).lean();
 
-      const progressMap: Record<string, { stage: string; interval: number; dueDate: Date }> = {};
+      const progressMap: Record<string, {
+        stage: string; interval: number; repetitions: number; easeFactor: number;
+        dueDate: Date; totalReviews: number; correctReviews: number;
+        lapses: number; xpEarned: number; lastReviewDate: Date | null; firstReviewDate: Date | null;
+      }> = {};
       for (const p of progressDocs) {
         progressMap[p.character] = {
-          stage: p.stage,
-          interval: p.interval,
-          dueDate: p.dueDate,
+          stage: p.stage, interval: p.interval, repetitions: p.repetitions,
+          easeFactor: p.easeFactor, dueDate: p.dueDate,
+          totalReviews: p.totalReviews, correctReviews: p.correctReviews,
+          lapses: p.lapses, xpEarned: p.xpEarned,
+          lastReviewDate: p.lastReviewDate, firstReviewDate: p.firstReviewDate,
         };
       }
 
@@ -103,7 +146,7 @@ router.get("/", async (req: Request, res: Response) => {
       results = results.map((r) => ({ ...r, progress: null }));
     }
 
-    res.json({
+    const response: Record<string, any> = {
       data: results,
       pagination: {
         page,
@@ -111,7 +154,9 @@ router.get("/", async (req: Request, res: Response) => {
         total,
         totalPages: Math.ceil(total / limit),
       },
-    });
+    };
+    if (librarySummary) response.summary = librarySummary;
+    res.json(response);
   } catch {
     res.status(500).json({ error: "Something went wrong." });
   }

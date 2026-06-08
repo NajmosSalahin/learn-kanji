@@ -13,12 +13,22 @@ export interface IKanji {
   name_readings_romaji: string[];
 }
 
+export interface KanjiProgressData {
+  stage: CardStage;
+  interval: number;
+  repetitions: number;
+  easeFactor: number;
+  dueDate: Date;
+  totalReviews: number;
+  correctReviews: number;
+  lapses: number;
+  xpEarned: number;
+  lastReviewDate: Date | null;
+  firstReviewDate: Date | null;
+}
+
 export interface KanjiWithProgress extends IKanji {
-  progress?: {
-    stage: CardStage;
-    interval: number;
-    dueDate: Date;
-  } | null;
+  progress?: KanjiProgressData | null;
 }
 
 export type CardStage = "new" | "learning" | "review" | "mastered";

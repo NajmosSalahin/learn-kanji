@@ -4,6 +4,7 @@ import { JlptBadge, StageBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAddToDeck } from "@/hooks/use-kanji";
 import { toast } from "sonner";
+import { SpeakButton } from "@/components/ui/speak-button";
 import { BookOpen, Loader2 } from "lucide-react";
 
 interface KanjiCardProps {
@@ -60,7 +61,12 @@ export function KanjiCard({ kanji, searchQuery }: KanjiCardProps) {
         <span className="font-kanji text-4xl text-text-primary transition-colors group-hover:text-accent">
           {kanji.character}
         </span>
-        <JlptBadge level={kanji.jlpt_new} />
+        <div className="flex items-center gap-1">
+          {kanji.character && (
+            <SpeakButton text={kanji.character} size="sm" />
+          )}
+          <JlptBadge level={kanji.jlpt_new} />
+        </div>
       </div>
 
       <div className="mt-2 space-y-1">

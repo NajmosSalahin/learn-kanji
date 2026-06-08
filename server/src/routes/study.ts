@@ -66,6 +66,33 @@ router.post("/add", async (req: Request, res: Response) => {
   }
 });
 
+router.post("/remove", async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId;
+    if (!userId) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+
+    const { character } = req.body;
+    if (!character) {
+      res.status(400).json({ error: "Character is required." });
+      return;
+    }
+
+    await connectDB();
+    const result = await KanjiProgress.deleteOne({ userId, character });
+    if (result.deletedCount === 0) {
+      res.status(404).json({ error: "Kanji not found in your deck." });
+      return;
+    }
+
+    res.json({ message: "Removed from your deck." });
+  } catch {
+    res.status(500).json({ error: "Something went wrong." });
+  }
+});
+
 router.post("/review", async (req: Request, res: Response) => {
   try {
     const userId = (req as any).userId;

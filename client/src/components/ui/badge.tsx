@@ -39,6 +39,23 @@ export function JlptBadge({ level }: { level: number | null }) {
   return <Badge variant={variant}>N{level}</Badge>;
 }
 
+const stageLabels: Record<string, string> = {
+  learning: "Learning",
+  review: "Reviewed",
+  mastered: "Mastered",
+};
+
+const stageDescriptions: Record<string, string> = {
+  learning: "Learning — reviewing daily",
+  review: "Reviewed — due for periodic review",
+  mastered: "Mastered — fully learned",
+};
+
 export function StageBadge({ stage }: { stage: string }) {
-  return <Badge variant={stage as BadgeVariant}>{stage}</Badge>;
+  if (stage === "new") return null;
+  return (
+    <Badge variant={stage as BadgeVariant} title={stageDescriptions[stage]}>
+      {stageLabels[stage] || stage}
+    </Badge>
+  );
 }
