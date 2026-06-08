@@ -1,0 +1,77 @@
+@import "tailwindcss";
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/bricolage-grotesque";
+@import "@fontsource/noto-serif-jp/400.css";
+@import "@fontsource/noto-serif-jp/700.css";
+
+@theme {
+  --color-background: #080c14;
+  --color-surface: #0f1724;
+  --color-border: #1e2d44;
+  --color-accent: #e8a045;
+  --color-accent-hover: #d4912f;
+  --color-text-primary: #f0f4ff;
+  --color-text-secondary: #8fa3be;
+
+  --color-jlpt-5-bg: #064e3b;
+  --color-jlpt-5-text: #34d399;
+  --color-jlpt-5-border: #10b981;
+  --color-jlpt-4-bg: #0c4a6e;
+  --color-jlpt-4-text: #38bdf8;
+  --color-jlpt-4-border: #0ea5e9;
+  --color-jlpt-3-bg: #2e1065;
+  --color-jlpt-3-text: #c084fc;
+  --color-jlpt-3-border: #8b5cf6;
+  --color-jlpt-2-bg: #451a03;
+  --color-jlpt-2-text: #fcd34d;
+  --color-jlpt-2-border: #f59e0b;
+  --color-jlpt-1-bg: #4c0519;
+  --color-jlpt-1-text: #fb7185;
+  --color-jlpt-1-border: #f43f5e;
+
+  --font-kanji: "Noto Serif JP", serif;
+  --font-heading: "Bricolage Grotesque", sans-serif;
+  --font-body: "Inter", sans-serif;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(232, 160, 69, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(232, 160, 69, 0.6); }
+}
+
+@keyframes streak-fire {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.15); opacity: 0.8; }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-streak-fire {
+  animation: streak-fire 1.5s ease-in-out infinite;
+}
+
+.card-flip-perspective {
+  perspective: 1000px;
+}
+
+.card-flip-inner {
+  transform-style: preserve-3d;
+}
+
+.card-front, .card-back {
+  backface-visibility: hidden;
+  position: absolute;
+  inset: 0;
+}
+
+.card-back {
+  transform: rotateY(180deg);
+}

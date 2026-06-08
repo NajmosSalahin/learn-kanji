@@ -1,0 +1,26 @@
+#!/bin/bash
+# Pre-commit hook: Auto-generate commit message suggestion using commit-message-writer agent
+# 
+# This hook runs before commit and displays staged changes so you can generate
+# a commit message using the commit-message-writer agent
+
+echo "=================================================="
+echo "📝 Staged Changes (for commit-message-writer)"
+echo "=================================================="
+
+# Show staged files
+echo ""
+echo "📁 Modified Files:"
+git diff --staged --name-only | sed 's/^/  - /'
+
+echo ""
+echo "📊 Diff Summary:"
+git diff --staged --stat
+
+echo ""
+echo "🤖 To generate a commit message:"
+echo "   1. Copy the commit-message-writer agent from Copilot"
+echo "   2. Or go to chat and type: /commit-message-writer"
+echo "   3. Leave the input blank (it will auto-analyze staged changes)"
+echo ""
+echo "=================================================="
