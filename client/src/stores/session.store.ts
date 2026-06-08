@@ -2,6 +2,7 @@ import { create } from "zustand";
 import type { KanjiProgress, StudyDeck, ReviewedCard, ReviewResponse } from "@/types/study";
 import type { Quality } from "@/types/kanji";
 import type { SessionStatus } from "@/types/study";
+import type { AchievementEvent } from "@/types/achievement";
 import { toast } from "sonner";
 
 interface SessionStore {
@@ -14,6 +15,7 @@ interface SessionStore {
   levelUpEvent: { from: number; to: number } | null;
   streakMilestone: number | null;
   totalCards: number;
+  newAchievements: AchievementEvent[];
 
   startSession: (deck: StudyDeck) => void;
   submitReview: (character: string, quality: Quality) => Promise<void>;
@@ -31,6 +33,7 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
   levelUpEvent: null,
   streakMilestone: null,
   totalCards: 0,
+  newAchievements: [],
 
   startSession: (deck) => {
     const allCards = [...deck.newCards, ...deck.dueCards].sort(() => Math.random() - 0.5);
@@ -44,6 +47,7 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
       xpEarnedThisSession: 0,
       levelUpEvent: null,
       streakMilestone: null,
+      newAchievements: [],
       totalCards: allCards.length,
     });
   },
@@ -83,6 +87,12 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
           }
         }
 
+        if (data.achievements?.length > 0) {
+          for (const a of data.achievements) {
+            toast.success(`${a.icon} Achievement unlocked: ${a.name}!`, { duration: 5000 });
+          }
+        }
+
         const reviewed: ReviewedCard = {
           character,
           quality,
@@ -109,6 +119,7 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
           xpEarnedThisSession: state.xpEarnedThisSession + data.xpAwarded,
           levelUpEvent: data.levelUp || state.levelUpEvent,
           streakMilestone: data.streakMilestone || state.streakMilestone,
+          newAchievements: [...state.newAchievements, ...(data.achievements || [])],
           status: nextCard ? "active" : "complete",
         });
       }

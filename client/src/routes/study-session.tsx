@@ -49,7 +49,8 @@ function StudySessionPage() {
   const {
     status, currentCard, queue, reviewedCards,
     xpEarnedThisSession, levelUpEvent, streakMilestone,
-    totalCards, startSession, submitReview, endSession
+    totalCards, startSession, submitReview, endSession,
+    newAchievements,
   } = useStudySession();
 
   const [showBack, setShowBack] = useState(false);
@@ -110,6 +111,7 @@ function StudySessionPage() {
                 xpEarned={xpEarnedThisSession}
                 levelUp={levelUpEvent}
                 streakMilestone={streakMilestone}
+                newAchievements={newAchievements}
               />
             </div>
           </main>

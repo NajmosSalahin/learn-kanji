@@ -4,25 +4,20 @@ import {
   Compass,
   GraduationCap,
   BarChart3,
-  Settings,
-  LogOut,
   ChevronLeft,
   Library,
 } from "lucide-react";
 import { useState } from "react";
-import { useAuthStore } from "@/stores/auth.store";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/explore", label: "Explore", icon: Compass },
   { href: "/study", label: "Study", icon: GraduationCap },
   { href: "/progress", label: "Progress", icon: BarChart3 },
-  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 export function Sidebar() {
-  const { pathname, search } = useLocation();
-  const logout = useAuthStore((s) => s.logout);
+  const { pathname } = useLocation();
   const [collapsed, setCollapsed] = useState(false);
 
   return (
@@ -82,13 +77,6 @@ export function Sidebar() {
             className={`h-4 w-4 transition-transform ${collapsed ? "rotate-180" : ""}`}
           />
           {!collapsed && <span>Collapse</span>}
-        </button>
-        <button
-          onClick={logout}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-surface/80 hover:text-red-400"
-        >
-          <LogOut className="h-4 w-4 flex-shrink-0" />
-          {!collapsed && <span>Log out</span>}
         </button>
       </div>
     </aside>

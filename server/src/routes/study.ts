@@ -8,6 +8,7 @@ import { StudySession } from "../models/study-session.model.js";
 import { StreakRecord } from "../models/streak-record.model.js";
 import { calculateNextReview } from "../lib/srs.js";
 import { getLevelFromXP, XP_AWARDS } from "../lib/xp.js";
+import { checkAchievements } from "../lib/achievements.js";
 import { calculateStreak, getTodayString } from "../lib/streak.js";
 import { env } from "../env.js";
 
@@ -52,6 +53,11 @@ router.post("/add", async (req: Request, res: Response) => {
       easeFactor: 2.5,
       dueDate: new Date(),
     });
+
+    await User.updateOne(
+      { _id: userId, "flags.addedToDeck": { $ne: true } },
+      { $set: { "flags.addedToDeck": true } },
+    );
 
     res.json({
       message: "Kanji added to your deck!",
@@ -173,6 +179,14 @@ router.post("/review", async (req: Request, res: Response) => {
 
     if (result.stage === "mastered" && before !== "mastered") {
       user.stats.kanjiMastered += 1;
+      const masteredKanji = await Kanji.findOne({ character }).lean();
+      if (masteredKanji?.jlpt_new) {
+        const jlptKey = `N${masteredKanji.jlpt_new}` as const;
+        if (!user.jlptLevelsMastered?.includes(jlptKey)) {
+          if (!user.jlptLevelsMastered) user.jlptLevelsMastered = [];
+          user.jlptLevelsMastered.push(jlptKey);
+        }
+      }
     }
     if (result.stage === "review" && before === "learning") {
       user.stats.kanjiLearned += 1;
@@ -208,6 +222,87 @@ router.post("/review", async (req: Request, res: Response) => {
     if (user.stats.currentStreak === 7) streakMilestone = 7;
     else if (user.stats.currentStreak === 30) streakMilestone = 30;
     else if (user.stats.currentStreak === 100) streakMilestone = 100;
+
+    const todaySession = sessionStartTime
+      ? await StudySession.findOne({ userId, date: today }).lean()
+      : null;
+    const sessionCards = todaySession?.cardsStudied || 0;
+    const sessionIncorrect = todaySession?.incorrectAnswers || 0;
+    const goalStreak = user.achievements?.goalStreak ?? 0;
+    const sessionDuration = sessionStartTime
+      ? Math.floor((Date.now() - new Date(sessionStartTime).getTime()) / 1000)
+      : 0;
+
+    // Compute perfect days streak
+    const todayStr = getTodayString(user.timezone);
+    let perfectDaysStreak = user.perfectDaysStreak ?? 0;
+    if (sessionIncorrect === 0 && sessionCards > 0) {
+      if (user.lastPerfectDay === todayStr) {
+        // already counted today
+      } else {
+        perfectDaysStreak += 1;
+        user.perfectDaysStreak = perfectDaysStreak;
+        user.lastPerfectDay = todayStr;
+      }
+    } else if (sessionIncorrect > 0) {
+      perfectDaysStreak = 0;
+      user.perfectDaysStreak = 0;
+      user.lastPerfectDay = null;
+    }
+
+    // Track studied characters
+    const studiedProgresses = await KanjiProgress.find({ userId, lastReviewDate: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) } }).lean();
+    const studiedChars = [...new Set(studiedProgresses.map(p => p.character))];
+
+    // Track reading counts
+    if (!user.readingOnReviews) user.readingOnReviews = 0;
+    if (!user.readingKunReviews) user.readingKunReviews = 0;
+    user.readingOnReviews += 1;
+    user.readingKunReviews += 1;
+
+    // Track studied chars on user
+    if (!user.studiedCharacters) user.studiedCharacters = [];
+    const char = parsed.data.character;
+    if (!user.studiedCharacters.includes(char)) {
+      user.studiedCharacters.push(char);
+    }
+
+    const sessionData = {
+      perfectSession: sessionIncorrect === 0 && sessionCards > 0,
+      sessionCards,
+      sessionDuration,
+      sessionStartHour: new Date().getHours(),
+      goalStreak,
+      readingOnCount: user.readingOnReviews,
+      readingKunCount: user.readingKunReviews,
+      studiedCharacters: user.studiedCharacters ?? [],
+      perfectDaysStreak,
+      daysSinceLastStudy: user.stats.lastStudyDate
+        ? Math.floor((Date.now() - new Date(user.stats.lastStudyDate).getTime()) / 86400000)
+        : 999,
+      firstCorrect: correct && user.stats.totalCorrect === 1,
+      jlptLevelsMastered: user.jlptLevelsMastered ?? [],
+    };
+    const newAchievements = checkAchievements(
+      (user.achievements?.unlocked ?? []) as { achievementId: string; unlockedAt: Date }[],
+      user.stats,
+      sessionData,
+      user.flags as {
+        visitedExplore: boolean;
+        usedAudio: boolean;
+        addedToDeck: boolean;
+        openedKanjiDetail: boolean;
+        setGoal: boolean;
+      },
+    );
+    const newAchievementEvents: { id: string; name: string; icon: string; description: string }[] = [];
+    if (newAchievements.length > 0) {
+      if (!user.achievements) user.achievements = { unlocked: [], goalStreak: 0 };
+      for (const a of newAchievements) {
+        user.achievements.unlocked.push({ achievementId: a.id, unlockedAt: new Date() });
+        newAchievementEvents.push({ id: a.id, name: a.name, icon: a.icon, description: a.desc });
+      }
+    }
 
     await user.save();
 
@@ -253,6 +348,7 @@ router.post("/review", async (req: Request, res: Response) => {
       totalXP: user.stats.totalXP,
       levelUp,
       streakMilestone,
+      achievements: newAchievementEvents,
     });
   } catch {
     res.status(500).json({ error: "Something went wrong." });

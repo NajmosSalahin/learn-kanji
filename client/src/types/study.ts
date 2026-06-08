@@ -1,4 +1,5 @@
 import type { CardStage, Quality } from "./kanji";
+import type { AchievementEvent } from "./achievement";
 
 export interface KanjiCardData {
   meanings: string[];
@@ -53,6 +54,7 @@ export interface ReviewResponse {
   totalXP: number;
   levelUp: { from: number; to: number } | null;
   streakMilestone: number | null;
+  achievements: AchievementEvent[];
 }
 
 export interface ReviewedCard {

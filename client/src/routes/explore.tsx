@@ -1,13 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AuthGuard } from "@/components/layout/auth-guard";
 import { Sidebar } from "@/components/layout/sidebar";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useKanjiList } from "@/hooks/use-kanji";
 import { SearchBar } from "@/components/kanji/search-bar";
 import { FilterBar } from "@/components/kanji/filter-bar";
 import { KanjiGrid } from "@/components/kanji/kanji-grid";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { reportFlag } from "@/lib/report-flag";
 
 export const Route = createFileRoute("/explore")({
   component: ExplorePage,
@@ -15,6 +16,14 @@ export const Route = createFileRoute("/explore")({
 
 function ExplorePage() {
   const [search, setSearch] = useState("");
+  const [flagReported, setFlagReported] = useState(false);
+
+  useEffect(() => {
+    if (!flagReported) {
+      setFlagReported(true);
+      reportFlag("visitedExplore");
+    }
+  }, [flagReported]);
   const [jlpt, setJlpt] = useState("");
   const [grade, setGrade] = useState("");
   const [page, setPage] = useState(1);

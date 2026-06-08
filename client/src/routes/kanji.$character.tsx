@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AuthGuard } from "@/components/layout/auth-guard";
 import { Sidebar } from "@/components/layout/sidebar";
+import { useEffect } from "react";
 import { useKanjiDetail, useAddToDeck } from "@/hooks/use-kanji";
 import { JlptBadge, StageBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { SpeakButton } from "@/components/ui/speak-button";
 import { BookOpen, Loader2, ArrowLeft } from "lucide-react";
+import { reportFlag } from "@/lib/report-flag";
 
 export const Route = createFileRoute("/kanji/$character")({
   component: KanjiDetailPage,
@@ -15,6 +17,10 @@ export const Route = createFileRoute("/kanji/$character")({
 
 function KanjiDetailPage() {
   const { character } = Route.useParams();
+
+  useEffect(() => {
+    reportFlag("openedKanjiDetail");
+  }, []);
   const { data, isLoading } = useKanjiDetail(character);
   const addToDeck = useAddToDeck();
   const kanji = data?.data;

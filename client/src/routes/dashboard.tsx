@@ -7,6 +7,7 @@ import { XPBar } from "@/components/dashboard/xp-bar";
 import { StatsGrid } from "@/components/dashboard/stats-grid";
 import { DueTodayCard } from "@/components/dashboard/due-today-card";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
+import { LatestAchievement } from "@/components/dashboard/latest-achievement";
 import { getGreeting } from "@/lib/utils";
 
 export const Route = createFileRoute("/dashboard")({
@@ -45,32 +46,7 @@ function DashboardPage() {
                 <RecentActivity />
               </div>
 
-              <div className="rounded-xl border border-border bg-surface p-4">
-                <h3 className="text-sm font-semibold text-text-primary">Quick actions</h3>
-                <div className="mt-3 space-y-2">
-                  <Link
-                    to="/study"
-                    className="flex items-center justify-between rounded-lg bg-accent/10 px-4 py-3 text-sm text-accent transition-colors hover:bg-accent/20"
-                  >
-                    <span>Start study session</span>
-                    <span>→</span>
-                  </Link>
-                  <Link
-                    to="/explore"
-                    className="flex items-center justify-between rounded-lg bg-surface/50 px-4 py-3 text-sm text-text-secondary transition-colors hover:bg-surface"
-                  >
-                    <span>Browse kanji</span>
-                    <span>→</span>
-                  </Link>
-                  <Link
-                    to="/progress"
-                    className="flex items-center justify-between rounded-lg bg-surface/50 px-4 py-3 text-sm text-text-secondary transition-colors hover:bg-surface"
-                  >
-                    <span>View progress</span>
-                    <span>→</span>
-                  </Link>
-                </div>
-              </div>
+              <LatestAchievement />
             </div>
           </div>
         </main>

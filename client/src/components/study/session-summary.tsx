@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import confetti from "canvas-confetti";
 
+import type { AchievementEvent } from "@/types/achievement";
+
 interface SessionSummaryProps {
   totalCards: number;
   correctCount: number;
@@ -11,6 +13,7 @@ interface SessionSummaryProps {
   xpEarned: number;
   levelUp: { from: number; to: number } | null;
   streakMilestone: number | null;
+  newAchievements?: AchievementEvent[];
 }
 
 export function SessionSummary({
@@ -20,6 +23,7 @@ export function SessionSummary({
   xpEarned,
   levelUp,
   streakMilestone,
+  newAchievements = [],
 }: SessionSummaryProps) {
   const accuracy = totalCards > 0 ? Math.round((correctCount / totalCards) * 100) : 0;
 
@@ -51,6 +55,22 @@ export function SessionSummary({
           <p className="font-heading font-bold text-accent">
             {streakMilestone}-day streak milestone!
           </p>
+        </div>
+      )}
+
+      {newAchievements.length > 0 && (
+        <div className="rounded-xl border border-accent/40 bg-accent/5 p-4">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-accent mb-2">
+            Achievements Unlocked
+          </h3>
+          <div className="space-y-2">
+            {newAchievements.map((a) => (
+              <div key={a.id} className="flex items-center gap-2 text-sm text-text-primary">
+                <span>{a.icon}</span>
+                <span>{a.name}</span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

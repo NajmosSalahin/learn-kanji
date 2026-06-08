@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { useTts } from "@/hooks/use-tts";
 import { Volume2, Loader2, VolumeX, RefreshCw } from "lucide-react";
+import { reportFlag } from "@/lib/report-flag";
 
 interface SpeakButtonProps {
   text: string;
@@ -9,6 +11,7 @@ interface SpeakButtonProps {
 
 export function SpeakButton({ text, size = "sm", tooltip = "Play pronunciation" }: SpeakButtonProps) {
   const { speak, retry, isReady, isLoading, error, status } = useTts();
+  const [audioReported, setAudioReported] = useState(false);
 
   async function handleClick(e: React.MouseEvent) {
     e.preventDefault();
@@ -19,6 +22,11 @@ export function SpeakButton({ text, size = "sm", tooltip = "Play pronunciation" 
     if (status === "error") {
       retry();
       return;
+    }
+
+    if (!audioReported) {
+      setAudioReported(true);
+      reportFlag("usedAudio");
     }
 
     try {

@@ -8,6 +8,7 @@ export function useStudySession() {
   const xpEarnedThisSession = useSessionStore((s) => s.xpEarnedThisSession);
   const levelUpEvent = useSessionStore((s) => s.levelUpEvent);
   const streakMilestone = useSessionStore((s) => s.streakMilestone);
+  const newAchievements = useSessionStore((s) => s.newAchievements);
   const totalCards = useSessionStore((s) => s.totalCards);
   const startSession = useSessionStore((s) => s.startSession);
   const submitReview = useSessionStore((s) => s.submitReview);
@@ -21,6 +22,7 @@ export function useStudySession() {
     xpEarnedThisSession,
     levelUpEvent,
     streakMilestone,
+    newAchievements,
     totalCards,
     startSession,
     submitReview,

@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useAuthStore } from "@/stores/auth.store";
+import { ProfileMenu } from "./profile-menu";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuthStore();
@@ -27,5 +28,12 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     return null;
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      <div className="fixed top-4 right-4 z-50">
+        <ProfileMenu />
+      </div>
+      {children}
+    </>
+  );
 }

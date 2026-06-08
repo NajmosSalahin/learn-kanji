@@ -9,6 +9,7 @@ import { Slider } from "@/components/ui/slider";
 import { Card } from "@/components/ui/card";
 import { PasswordStrengthMeter } from "@/components/auth/password-strength-meter";
 import { toast } from "sonner";
+import { reportFlag } from "@/lib/report-flag";
 
 type Tab = "profile" | "preferences" | "account";
 
@@ -64,6 +65,7 @@ function SettingsPage() {
       });
       if (res.ok) {
         toast.success("Preferences saved");
+        reportFlag("setGoal");
       } else {
         toast.error("Failed to save preferences");
       }

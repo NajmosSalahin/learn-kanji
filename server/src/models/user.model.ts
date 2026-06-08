@@ -1,5 +1,10 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
+export interface IUnlockedAchievement {
+  achievementId: string;
+  unlockedAt: Date;
+}
+
 export interface IUserDocument extends Document {
   email: string;
   passwordHash: string;
@@ -30,6 +35,23 @@ export interface IUserDocument extends Document {
     kanjiLearned: number;
     kanjiMastered: number;
   };
+  achievements: {
+    unlocked: IUnlockedAchievement[];
+    goalStreak: number;
+  };
+  flags: {
+    visitedExplore: boolean;
+    usedAudio: boolean;
+    addedToDeck: boolean;
+    openedKanjiDetail: boolean;
+    setGoal: boolean;
+  };
+  readingOnReviews: number;
+  readingKunReviews: number;
+  perfectDaysStreak: number;
+  lastPerfectDay: string | null;
+  studiedCharacters: string[];
+  jlptLevelsMastered: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -65,6 +87,23 @@ const userSchema = new Schema<IUserDocument>(
       kanjiLearned: { type: Number, default: 0 },
       kanjiMastered: { type: Number, default: 0 },
     },
+    achievements: {
+      unlocked: [{ achievementId: String, unlockedAt: { type: Date, default: Date.now } }],
+      goalStreak: { type: Number, default: 0 },
+    },
+    flags: {
+      visitedExplore: { type: Boolean, default: false },
+      usedAudio: { type: Boolean, default: false },
+      addedToDeck: { type: Boolean, default: false },
+      openedKanjiDetail: { type: Boolean, default: false },
+      setGoal: { type: Boolean, default: false },
+    },
+    readingOnReviews: { type: Number, default: 0 },
+    readingKunReviews: { type: Number, default: 0 },
+    perfectDaysStreak: { type: Number, default: 0 },
+    lastPerfectDay: { type: String, default: null },
+    studiedCharacters: [{ type: String }],
+    jlptLevelsMastered: [{ type: String }],
   },
   { timestamps: true }
 );

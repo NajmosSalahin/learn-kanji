@@ -11,6 +11,7 @@ import authRoutes from "./routes/auth.js";
 import kanjiRoutes from "./routes/kanji.js";
 import studyRoutes from "./routes/study.js";
 import progressRoutes from "./routes/progress.js";
+import achievementRoutes from "./routes/achievements.js";
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -27,6 +28,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/kanji", kanjiRoutes);
 app.use("/api/study", studyRoutes);
 app.use("/api/progress", progressRoutes);
+app.use("/api/achievements", achievementRoutes);
 
 const clientDist = path.resolve(__dirname, "../../client/dist");
 app.use(express.static(clientDist));
